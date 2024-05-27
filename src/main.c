@@ -7,10 +7,10 @@
 int main(int argc, char **argv) {
 
     int screenNum;
-    xcb_connection_t *connect = xcb_connect("192.168.3.3:0.0", &screenNum);
+    xcb_connection_t *connect = xcb_connect(NULL, &screenNum);
 
     if (xcb_connection_has_error(connect)) {
-        printf("connection");
+        printf("connection error");
         return 1;
     }
 
@@ -27,7 +27,6 @@ int main(int argc, char **argv) {
     xcb_flush(connect);
 
     xcb_generic_event_t *event;
-
     while ((event = xcb_wait_for_event(connect))) {
         switch (event->response_type & 0x80) {
         case XCB_EXPOSE:
