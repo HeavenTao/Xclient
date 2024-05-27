@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -25,7 +26,18 @@ int main(int argc, char **argv) {
 
     xcb_flush(connect);
 
-    pause();
+    xcb_generic_event_t *event;
+
+    while ((event = xcb_wait_for_event(connect))) {
+        switch (event->response_type & 0x80) {
+        case XCB_EXPOSE:
+            break;
+        default:
+            break;
+        }
+
+        free(event);
+    }
 
     xcb_disconnect(connect);
 
