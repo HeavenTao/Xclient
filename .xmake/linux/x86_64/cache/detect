@@ -1,0 +1,7 @@
+{
+    find_program = {
+        clang = "/usr/sbin/clang",
+        ping = "/usr/sbin/ping",
+        git = "/usr/sbin/git"
+    }
+}

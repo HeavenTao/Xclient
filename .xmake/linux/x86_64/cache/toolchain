@@ -1,0 +1,22 @@
+{
+    tool_target_Xclient_linux_x86_64_cc = {
+        toolname = "clang",
+        program = "/usr/sbin/clang-17",
+        toolchain_info = {
+            name = "clang-17",
+            plat = "linux",
+            arch = "x86_64",
+            cachekey = "clang-17_arch_x86_64_plat_linux"
+        }
+    },
+    tool_target_Xclient_linux_x86_64_ld = {
+        toolname = "clang",
+        program = "/usr/sbin/clang-17",
+        toolchain_info = {
+            name = "clang-17",
+            plat = "linux",
+            arch = "x86_64",
+            cachekey = "clang-17_arch_x86_64_plat_linux"
+        }
+    }
+}
