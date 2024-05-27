@@ -1,0 +1,5 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+AlignAfterOpenBracket: Align
+BinPackParameters: false
+AllowAllArgumentsOnNextLine: true
