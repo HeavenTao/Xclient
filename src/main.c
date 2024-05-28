@@ -6,6 +6,33 @@
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 
+void set_window_type(xcb_connection_t *connect, xcb_window_t window) {
+    const char *name = "_NET_WM_WINDOW_TYPE";
+    xcb_intern_atom_cookie_t cookie =
+        xcb_intern_atom(connect, 1, strlen(name), name);
+
+    xcb_intern_atom_reply_t *reply =
+        xcb_intern_atom_reply(connect, cookie, NULL);
+    if (!reply)
+        return;
+
+    xcb_atom_t net_wm_window_type = reply->atom;
+    free(reply);
+    xcb_intern_atom_cookie_t normal_cookie =
+        xcb_intern_atom(connect, 0, 22, "_NET_WM_WINDOW_TYPE_NORMAL");
+    xcb_intern_atom_reply_t *normal_reply =
+        xcb_intern_atom_reply(connect, normal_cookie, NULL);
+    if (!normal_reply)
+        return;
+
+    xcb_atom_t net_wm_window_type_normal = normal_reply->atom;
+    free(normal_reply);
+
+    xcb_change_property(connect, XCB_PROP_MODE_REPLACE, window,
+                        net_wm_window_type, XCB_ATOM_ATOM, 32, 1,
+                        &net_wm_window_type_normal);
+}
+
 int main(int argc, char **argv) {
 
     int screenNum;
@@ -34,7 +61,7 @@ int main(int argc, char **argv) {
                                     XCB_EVENT_MASK_BUTTON_PRESS};
     xcb_window_t window = xcb_generate_id(connect);
     xcb_create_window(connect, XCB_COPY_FROM_PARENT, window, screen->root, 0, 0,
-                      800, 400, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                      800, 400, 5, XCB_WINDOW_CLASS_INPUT_OUTPUT,
                       screen->root_visual, window_mask, window_values);
     printf("window1 id is %d\n", window);
 
@@ -45,7 +72,7 @@ int main(int argc, char **argv) {
                                      XCB_EVENT_MASK_BUTTON_PRESS};
     xcb_window_t window2 = xcb_generate_id(connect);
     xcb_create_window(connect, XCB_COPY_FROM_PARENT, window2, screen->root, 800,
-                      0, 200, 200, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                      0, 200, 200, 10, XCB_WINDOW_CLASS_INPUT_OUTPUT,
                       screen->root_visual, window2_mask, window2_values);
 
     /*change window property*/
@@ -53,7 +80,7 @@ int main(int argc, char **argv) {
     xcb_change_property(connect, XCB_PROP_MODE_REPLACE, window,
                         XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, strlen(title),
                         title);
-
+    set_window_type(connect, window);
     /*map window*/
     xcb_map_window(connect, window);
     xcb_map_window(connect, window2);
