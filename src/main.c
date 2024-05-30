@@ -1,42 +1,48 @@
+#include <X11/X.h>
+#include <X11/Xlib.h>
+#include <X11/Xproto.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <xcb/composite.h>
-#include <xcb/xcb.h>
-#include <xcb/xcb_aux.h>
-#include <xcb/xcb_util.h>
-#include <xcb/xcbext.h>
-#include <xcb/xproto.h>
-
-int checkOtherWm(xcb_connection_t *connect, xcb_screen_t *screen) {
-    uint32_t mask = {XCB_CW_EVENT_MASK};
-    uint32_t values[] = {XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT};
-
-    xcb_void_cookie_t cookie = xcb_change_window_attributes_checked(
-        connect, screen->root, mask, values);
-    xcb_generic_error_t *err = xcb_request_check(connect, cookie);
-    if (err) {
-        free(err);
-        printf("has wm runing");
-        return 1;
-    } else {
-        return 0;
-    }
-}
 
 int main(int argc, char **argv) {
-    int screenNum;
-    xcb_connection_t *connect = xcb_connect("192.168.3.3:0.0", &screenNum);
-    if (xcb_connection_has_error(connect)) {
-        printf("connection error");
+    Display *dpy = XOpenDisplay("192.168.3.3:0.0");
+    if (dpy == NULL) {
+        printf("Can't connect to display\n");
         return 1;
     }
 
-    xcb_screen_t *screen = xcb_aux_get_screen(connect, screenNum);
+    Screen *screen = XDefaultScreenOfDisplay(dpy);
 
-    int result = checkOtherWm(connect, screen);
+    Visual *visual = XDefaultVisualOfScreen(screen);
+    int depth = XDefaultDepthOfScreen(screen);
 
-    printf("result is %d", result);
+    Window root = XRootWindowOfScreen(screen);
 
-    xcb_disconnect(connect);
+    int x = 0, y = 0;
+    Window window = XCreateWindow(dpy, root, x, y, 400, 400, 1, CopyFromParent,
+                                  InputOutput, CopyFromParent, 0, NULL);
+
+    XStoreName(dpy, window, "hello world");
+
+    XSetWindowBackground(dpy, window, BlackPixel(dpy, 0));
+
+    XSelectInput(dpy, window, ExposureMask | KeyPressMask);
+
+    XMapWindow(dpy, window);
+
+    XEvent event;
+    while (1) {
+        XNextEvent(dpy, &event);
+        if (event.type == Expose) {
+        } else if (event.type == KeyPress) {
+            x = x + 10;
+            y = y + 10;
+            XMoveWindow(dpy, window, x, y);
+        }
+    }
+
+    XDestroyWindow(dpy, window);
+
+    XCloseDisplay(dpy);
+
     return 0;
 }
